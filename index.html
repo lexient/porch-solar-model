@@ -48,6 +48,24 @@
   .chip.faulty, .chip.remove { background: #fbe3e1; color: #a32a22; }
   .chip.new { background: #dce8fd; color: #174ea6; }
   .dim { background: #1d2329; color: #fff; font-size: 11px; font-weight: 600; padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+  .photo-pin { pointer-events: auto; width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 2px solid #fff; background: #1d2329; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+  .photo-pin svg { width: 16px; height: 16px; }
+  .photo-pin:hover, .photo-pin:focus-visible { background: var(--new); outline: none; }
+  #legend .photo-key .photo-pin { width: 22px; height: 22px; border-width: 1px; box-shadow: none; cursor: default; }
+  #legend .photo-key .photo-pin svg { width: 12px; height: 12px; }
+  #gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  #gallery button { padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: pointer; background: #f2f4f5; aspect-ratio: 3 / 4; }
+  #gallery img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  #gallery button:focus-visible { outline: 2px solid var(--new); outline-offset: 2px; }
+  #photo { padding: 0; border: 0; border-radius: 10px; background: #15191d; color: #fff; max-width: 94vw; max-height: 94vh; overflow: hidden; }
+  #photo::backdrop { background: rgba(10,14,18,.75); }
+  #photo img { display: block; max-width: 94vw; max-height: calc(94vh - 56px); margin: 0 auto; }
+  #photo .bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+  #photo .bar p { flex: 1; margin: 0; font-size: 14px; }
+  #photo .count { color: #aab3bb; font-size: 12px; white-space: nowrap; }
+  #photo button { background: #2b3238; color: #fff; border: 0; border-radius: 6px; padding: 6px 11px; font: inherit; cursor: pointer; }
+  #photo button:focus-visible { outline: 2px solid #7fb2ff; outline-offset: 2px; }
+  body.render .photo-pin, body.render .photo-key { display: none !important; }
   body.render #app { grid-template-columns: 1fr; }
   body.render #panel, body.render #toolbar, body.render #hint { display: none; }
   body.render #title { display: block; }
@@ -72,6 +90,10 @@
   <aside id="panel">
     <h1>Solar inverter replacement: quote request</h1>
     <p class="lead">Front porch wall. Single-phase supply on the United Energy network. Use the buttons on the model to switch between the existing setup and the proposed work.</p>
+
+    <h2>Site photos</h2>
+    <p class="small">Click a camera marker on the model, or the meter box, isolators, inverter, light or front door, to see the real photo.</p>
+    <div id="gallery"></div>
 
     <h2>Work required</h2>
     <ol>
@@ -143,10 +165,22 @@
       <div><i style="border-color: #9aa0a3"></i> Existing conduit</div>
       <div><i style="border-color: var(--remove); border-top-style: dashed"></i> To be removed</div>
       <div><i style="border-color: #1d2329; border-top-width: 2px"></i> Measured on site</div>
+      <div class="photo-key"><span class="photo-pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9Zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></span> Real photo, click to open</div>
     </div>
-    <div id="hint">Drag to rotate, scroll to zoom, right-drag to pan</div>
+    <div id="hint">Drag to rotate, scroll to zoom, right-drag to pan. Click a camera for a photo.</div>
   </main>
 </div>
+
+<dialog id="photo" aria-labelledby="photoCaption">
+  <img alt="">
+  <div class="bar">
+    <button type="button" data-step="-1" aria-label="Previous photo">&lsaquo;</button>
+    <p id="photoCaption"></p>
+    <span class="count"></span>
+    <button type="button" data-step="1" aria-label="Next photo">&rsaquo;</button>
+    <button type="button" class="close">Close</button>
+  </div>
+</dialog>
 
 <script type="module">
 import * as THREE from 'three';
@@ -443,7 +477,6 @@ brickBlock([-0.11, 0, -0.18, 2.28, 0, 0.24]);       // brick between door and co
 brickBlock([-0.11, 0, 2.10, 2.28, 0.24, 1.30]);     // above the door
 brickBlock([-0.11, 0, -0.18, 2.28, 1.30, 1.36]);
 brickBlock([-3, 0.36, -0.18, 2.28, 1.36, 4.4]);     // front room, 0.36 m proud of the door
-brickBlock([2.85, 5.2, -0.18, 2.28, -3, -1.2]);     // house continues, set back
 
 // Front room window
 const curtain = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 1.2), M.curtain);
@@ -474,13 +507,18 @@ for (const ext of [
 ]) addBox(ext, M.channel, roof);
 addBox([3.21, 3.29, 0, 2.36, 2.52, 2.60], M.galv);
 
+// Clicking a part of the model tagged with a photo id opens that site photo.
+const tag = (object, photo) => { object.userData.photo = photo; return object; };
+const photoGroup = (photo, parent = scene) => { const g = tag(new THREE.Group(), photo); parent.add(g); return g; };
+
 // Front door: timber door behind a security screen door hinged on the corner side
-for (const ext of [[-0.11, 0, 0, 2.10, 0.24, 0.29], [-0.11, 0, 0, 2.10, 1.25, 1.30], [-0.11, 0, 2.05, 2.10, 0.24, 1.30]]) addBox(ext, M.white);
-addBox([-0.11, -0.10, 0.05, 2.05, 0.29, 1.25], M.timber);
-addBox([-0.06, -0.035, 0.05, 2.04, 0.30, 1.24], [M.screen, M.bronze, M.bronze, M.bronze, M.bronze, M.bronze]);
-addBox([-0.035, -0.012, 0.98, 1.10, 1.13, 1.16], M.toggle);
-addBox([-0.11, 0.03, 0, 0.045, 0.24, 1.30], M.threshold);
-addBox([0.05, 0.50, 0, 0.012, 0.42, 1.18], M.mat);
+const door = photoGroup('front-door-opening');
+for (const ext of [[-0.11, 0, 0, 2.10, 0.24, 0.29], [-0.11, 0, 0, 2.10, 1.25, 1.30], [-0.11, 0, 2.05, 2.10, 0.24, 1.30]]) addBox(ext, M.white, door);
+addBox([-0.11, -0.10, 0.05, 2.05, 0.29, 1.25], M.timber, door);
+addBox([-0.06, -0.035, 0.05, 2.04, 0.30, 1.24], [M.screen, M.bronze, M.bronze, M.bronze, M.bronze, M.bronze], door);
+addBox([-0.035, -0.012, 0.98, 1.10, 1.13, 1.16], M.toggle, door);
+addBox([-0.11, 0.03, 0, 0.045, 0.24, 1.30], M.threshold, door);
+addBox([0.05, 0.50, 0, 0.012, 0.42, 1.18], M.mat, door);
 
 const hinge = new THREE.Vector3(-0.045, 0.008, 0.30);
 const swing = [];
@@ -493,47 +531,50 @@ fatLine([hinge, swing.at(-1)], '#6b747c', 1.5, { dashed: true });
 
 // ---------- Equipment on the back wall ----------
 // Meter box, door open, with the meter above the main switchboard
+const meterBox = photoGroup('meter-box-inside');
 for (const ext of [
   [0.20, 0.216, 1.28, 1.92, 0, 0.20], [0.544, 0.56, 1.28, 1.92, 0, 0.20],
   [0.20, 0.56, 1.904, 1.92, 0, 0.20], [0.20, 0.56, 1.28, 1.296, 0, 0.20],
-]) addBox(ext, M.cream);
-addBox([0.216, 0.544, 1.296, 1.904, 0, 0.012], M.sheet);
-addBox([0.29, 0.47, 1.58, 1.87, 0.012, 0.03], M.board);
-addBox([0.305, 0.455, 1.60, 1.85, 0.03, 0.10], M.meter);
-addBox([0.32, 0.44, 1.78, 1.83, 0.10, 0.103], M.lcd);
-addBox([0.27, 0.49, 1.32, 1.52, 0.012, 0.085], M.switchboard);
-addBox([0.285, 0.475, 1.475, 1.505, 0.085, 0.088], M.warnGreen);
+]) addBox(ext, M.cream, meterBox);
+addBox([0.216, 0.544, 1.296, 1.904, 0, 0.012], M.sheet, meterBox);
+addBox([0.29, 0.47, 1.58, 1.87, 0.012, 0.03], M.board, meterBox);
+addBox([0.305, 0.455, 1.60, 1.85, 0.03, 0.10], M.meter, meterBox);
+addBox([0.32, 0.44, 1.78, 1.83, 0.10, 0.103], M.lcd, meterBox);
+addBox([0.27, 0.49, 1.32, 1.52, 0.012, 0.085], M.switchboard, meterBox);
+addBox([0.285, 0.475, 1.475, 1.505, 0.085, 0.088], M.warnGreen, meterBox);
 for (let i = 0; i < 9; i++) {
   const x = 0.301 + i * 0.0175;
-  addBox([x, x + 0.0165, 1.37, 1.44, 0.085, 0.10], M.breaker);
-  addBox([x + 0.004, x + 0.0125, 1.395, 1.415, 0.10, 0.11], i === 0 || i === 8 ? M.toggleBlue : M.toggle);
+  addBox([x, x + 0.0165, 1.37, 1.44, 0.085, 0.10], M.breaker, meterBox);
+  addBox([x + 0.004, x + 0.0125, 1.395, 1.415, 0.10, 0.11], i === 0 || i === 8 ? M.toggleBlue : M.toggle, meterBox);
 }
 const meterDoor = new THREE.Group();
 meterDoor.position.set(0.56, 1.60, 0.20);
 meterDoor.rotation.y = THREE.MathUtils.degToRad(150);
-scene.add(meterDoor);
+meterBox.add(meterDoor);
 addBox([-0.36, 0, -0.32, 0.32, 0, 0.018], [M.cream, M.cream, M.cream, M.cream, M.cream, M.timber], meterDoor);
 
 // Solar isolators: left enclosure, and the labelled DC isolator nearer the inverter
+const isolators = photoGroup('isolators-and-conduit');
 for (const [x0, x1] of [[0.95, 1.065], [1.075, 1.19]]) {
-  addBox([x0, x1, 1.56, 1.78, 0, 0.10], M.enclosure);
-  addBox([x0 + 0.015, x1 - 0.015, 1.60, 1.73, 0.10, 0.104], M.enclosureWindow);
-  addBox([x0 + 0.035, x1 - 0.035, 1.645, 1.685, 0.06, 0.098], M.toggle);
+  addBox([x0, x1, 1.56, 1.78, 0, 0.10], M.enclosure, isolators);
+  addBox([x0 + 0.015, x1 - 0.015, 1.60, 1.73, 0.10, 0.104], M.enclosureWindow, isolators);
+  addBox([x0 + 0.035, x1 - 0.035, 1.645, 1.685, 0.06, 0.098], M.toggle, isolators);
 }
-addBox([1.085, 1.18, 1.745, 1.772, 0.10, 0.103], M.sticker);
+addBox([1.085, 1.18, 1.745, 1.772, 0.10, 0.103], M.sticker, isolators);
 
 // Porch light
+const lamp = photoGroup('inverter-and-light');
 const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.02, 24), M.brass);
 plate.rotation.x = Math.PI / 2;
 plate.position.set(1.20, 1.96, 0.01);
-scene.add(plate);
-addBox([1.19, 1.21, 1.95, 2.04, 0.01, 0.17], M.rust);
-addBox([1.13, 1.27, 2.02, 2.17, 0.105, 0.245], M.frosted);
-addBox([1.12, 1.28, 2.005, 2.025, 0.095, 0.255], M.rust);
+lamp.add(plate);
+addBox([1.19, 1.21, 1.95, 2.04, 0.01, 0.17], M.rust, lamp);
+addBox([1.13, 1.27, 2.02, 2.17, 0.105, 0.245], M.frosted, lamp);
+addBox([1.12, 1.28, 2.005, 2.025, 0.095, 0.255], M.rust, lamp);
 const lampRoof = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.08, 4), M.rust);
 lampRoof.rotation.y = Math.PI / 4;
 lampRoof.position.set(1.20, 2.21, 0.175);
-scene.add(lampRoof);
+lamp.add(lampRoof);
 
 // ---------- Existing and proposed equipment ----------
 const existing = new THREE.Group();
@@ -541,17 +582,19 @@ const proposed = new THREE.Group();
 scene.add(existing, proposed);
 
 const OLD_INVERTER = [1.285, 1.615, 1.42, 2.02, 0.012, 0.222];
-addBox([1.33, 1.57, 1.36, 1.43, 0, 0.012], M.inverterSide, existing);
-addBox(OLD_INVERTER, [M.inverterSide, M.inverterSide, M.inverterSide, M.inverterSide, M.aurora, M.inverterSide], existing);
-conduit([[1.008, 1.56, 0.03], [1.008, 1.335, 0.03], [1.56, 1.335, 0.03], [1.56, 1.42, 0.03]], '#b9bcbc', existing);
-conduit([[1.13, 1.56, 0.06], [1.13, 1.365, 0.06], [1.48, 1.365, 0.06], [1.48, 1.42, 0.06]], '#b9bcbc', existing);
+const oldInverter = photoGroup('inverter-and-light', existing);
+addBox([1.33, 1.57, 1.36, 1.43, 0, 0.012], M.inverterSide, oldInverter);
+addBox(OLD_INVERTER, [M.inverterSide, M.inverterSide, M.inverterSide, M.inverterSide, M.aurora, M.inverterSide], oldInverter);
+const oldConduits = photoGroup('isolators-and-conduit', existing);
+conduit([[1.008, 1.56, 0.03], [1.008, 1.335, 0.03], [1.56, 1.335, 0.03], [1.56, 1.42, 0.03]], '#b9bcbc', oldConduits);
+conduit([[1.13, 1.56, 0.06], [1.13, 1.365, 0.06], [1.48, 1.365, 0.06], [1.48, 1.42, 0.06]], '#b9bcbc', oldConduits);
 
-const ghost = addBox(OLD_INVERTER, M.ghost, proposed);
+const ghost = tag(addBox(OLD_INVERTER, M.ghost, proposed), 'inverter-and-light');
 ghost.castShadow = false;
 outline(ghost, '#c8372d', 2, { dashed: true, parent: proposed });
 
 const NEW_INVERTER = [1.25, 1.65, 1.40, 1.85, 0.012, 0.18];
-const newInverter = addBox(NEW_INVERTER, [M.newSide, M.newSide, M.newSide, M.newSide, M.newFront, M.newSide], proposed);
+const newInverter = tag(addBox(NEW_INVERTER, [M.newSide, M.newSide, M.newSide, M.newSide, M.newFront, M.newSide], proposed), 'inverter-and-light');
 outline(newInverter, '#1f63d1', 2.5, { parent: proposed });
 
 const SUB_BOARD = [0.25, 0.51, 0.94, 1.23, 0, 0.11];
@@ -592,6 +635,88 @@ dimension([0.03, 0, 0.03], [0.03, 2.28, 0.03], '2.28 m', [1, 0, 0]);
 dimension([1.40, 0, 0.03], [1.40, 1.33, 0.03], '1.33 m', [1, 0, 0]);
 dimension([0.015, 0.07, 0.24], [0.015, 0.07, 1.30], '1.06 m', [1, 0, 0]);
 dimension([0, 0.07, 1.345], [0.36, 0.07, 1.345], '0.36 m', [0, 0, 1]);
+
+// ---------- Site photos ----------
+// A pin places a camera marker on the model where the photo was taken.
+const PHOTOS = [
+  { id: 'porch-overview', caption: 'Porch wall: front door, meter box, isolators and Aurora inverter.' },
+  { id: 'porch-from-step', caption: 'Porch from the front step, with the front room window on the left.' },
+  { id: 'porch-from-garden', caption: 'Porch roof and wall from the garden side.' },
+  { id: 'meter-box-inside', caption: 'Inside the meter box: the meter, with the full main switchboard below it.', pin: [0.38, 1.72, 0.22] },
+  { id: 'corner-height', caption: 'Corner beside the front door. Floor to eave lining: 2.28 m.', pin: [0.04, 2.12, 0.06] },
+  { id: 'isolators-and-conduit', caption: 'Isolators and conduit under the inverter. Floor to conduit: 1.33 m.', pin: [0.92, 1.42, 0.08] },
+  { id: 'inverter-and-light', caption: 'Aurora inverter, porch light and DC isolator. Back wall width: 2.85 m.', pin: [1.72, 2.10, 0.12] },
+  { id: 'front-door-opening', caption: 'Front door. Opening, brick to brick: 1.06 m.', pin: [0, 1.55, 0.78] },
+  { id: 'brick-return', caption: 'Brick return beside the front door: 0.36 m.', pin: [0.18, 0.35, 1.35] },
+];
+
+const dialog = document.getElementById('photo');
+const dialogImg = dialog.querySelector('img');
+let photoIndex = 0;
+function showPhoto(i) {
+  photoIndex = (i + PHOTOS.length) % PHOTOS.length;
+  const { id, caption } = PHOTOS[photoIndex];
+  dialogImg.src = `photos/${id}.jpg`;
+  dialogImg.alt = caption;
+  dialog.querySelector('#photoCaption').textContent = caption;
+  dialog.querySelector('.count').textContent = `${photoIndex + 1} of ${PHOTOS.length}`;
+  if (!dialog.open) dialog.showModal();
+}
+const openPhoto = (id) => showPhoto(PHOTOS.findIndex((p) => p.id === id));
+for (const b of dialog.querySelectorAll('[data-step]')) b.addEventListener('click', () => showPhoto(photoIndex + Number(b.dataset.step)));
+dialog.querySelector('.close').addEventListener('click', () => dialog.close());
+dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+dialog.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') showPhoto(photoIndex - 1);
+  if (e.key === 'ArrowRight') showPhoto(photoIndex + 1);
+});
+
+const gallery = document.getElementById('gallery');
+const CAMERA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9Zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>';
+for (const p of PHOTOS) {
+  const thumb = document.createElement('button');
+  thumb.type = 'button';
+  thumb.innerHTML = `<img src="photos/thumbs/${p.id}.jpg" alt="${p.caption}" loading="lazy">`;
+  thumb.addEventListener('click', () => openPhoto(p.id));
+  gallery.append(thumb);
+  if (!p.pin) continue;
+  const pin = document.createElement('button');
+  pin.type = 'button';
+  pin.className = 'photo-pin';
+  pin.setAttribute('aria-label', `Photo: ${p.caption}`);
+  pin.innerHTML = CAMERA_ICON;
+  pin.addEventListener('click', () => openPhoto(p.id));
+  const marker = new CSS2DObject(pin);
+  marker.position.set(...p.pin);
+  scene.add(marker);
+}
+
+// A click (not a drag) on tagged equipment opens its photo.
+const meshes = [];
+// Fat lines (labels, dimensions, outlines) are meshes too, but should not catch clicks.
+scene.traverse((o) => { if (o.isMesh && !o.isLineSegments2) meshes.push(o); });
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+const isShown = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
+function photoAt(event) {
+  const r = renderer.domElement.getBoundingClientRect();
+  pointer.set(((event.clientX - r.left) / r.width) * 2 - 1, -((event.clientY - r.top) / r.height) * 2 + 1);
+  raycaster.setFromCamera(pointer, camera);
+  const hit = raycaster.intersectObjects(meshes, false).find((h) => h.object.material.visible !== false && isShown(h.object));
+  for (let o = hit?.object; o; o = o.parent) if (o.userData.photo) return o.userData.photo;
+  return null;
+}
+let pressedAt = null;
+renderer.domElement.addEventListener('pointerdown', (e) => { pressedAt = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', (e) => {
+  const isClick = pressedAt && Math.hypot(e.clientX - pressedAt[0], e.clientY - pressedAt[1]) < 6;
+  pressedAt = null;
+  const id = isClick && photoAt(e);
+  if (id) openPhoto(id);
+});
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'mouse' && e.buttons === 0) renderer.domElement.style.cursor = photoAt(e) ? 'pointer' : '';
+});
 
 // ---------- UI ----------
 const VIEWS = {
