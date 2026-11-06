@@ -25,7 +25,7 @@
   #panel .small { font-size: 12px; color: var(--muted); }
   #stage { position: relative; overflow: hidden; background: #dfe7ee; min-height: 0; }
   #stage canvas { display: block; }
-  .labels { position: absolute; inset: 0; pointer-events: none; }
+  .labels { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
   #toolbar { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 2; }
   .seg { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
   .seg button { border: 0; background: none; padding: 7px 12px; font: inherit; cursor: pointer; color: var(--ink); }
@@ -571,7 +571,7 @@ conduit([[0.38, 1.23, 0.06], [0.38, 1.30, 0.06]], '#1f63d1', proposed);
 
 // ---------- Labels ----------
 const SHARED = [
-  { title: 'Meter box and main switchboard', sub: 'Switchboard full: no spare poles', status: 'existing', anchor: [0.38, 1.46, 0.10], at: [0.02, 2.08, 0.75] },
+  { title: 'Meter box and main switchboard', sub: 'Switchboard full: no spare poles', status: 'existing', anchor: [0.38, 1.46, 0.10], at: [0.30, 2.12, 0.75] },
   { title: 'Solar isolators', sub: 'One labelled "Solar DC isolator"', status: 'existing', anchor: [1.07, 1.76, 0.10], at: [0.85, 2.32, 0.65] },
   { title: 'Screen door swing', sub: 'Opens across the meter box', status: 'existing', anchor: swing[12].toArray(), at: [0.95, 0.22, 1.55] },
 ];
