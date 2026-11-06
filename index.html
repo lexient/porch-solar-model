@@ -595,9 +595,9 @@ dimension([0, 0.07, 1.345], [0.36, 0.07, 1.345], '0.36 m', [0, 0, 1]);
 
 // ---------- UI ----------
 const VIEWS = {
-  overview: { pos: [2.55, 1.7, 3.75], target: [0.95, 1.2, 0.3], fov: 50 },
-  wall: { pos: [1.42, 1.25, 3.7], target: [1.42, 1.25, 0], fov: 42 },
-  plan: { pos: [1.3, 16, 1.205], target: [1.3, 0, 1.2], fov: 13 },
+  overview: { pos: [2.55, 1.7, 3.75], target: [0.95, 1.2, 0.3], fov: 50, fitAspect: 1.2 },
+  wall: { pos: [1.42, 1.25, 3.7], target: [1.42, 1.25, 0], fov: 42, fitAspect: 1.6 },
+  plan: { pos: [1.3, 16, 1.205], target: [1.3, 0, 1.2], fov: 13, fitAspect: 1 },
 };
 const TITLES = {
   existing: ['Existing: faulty Aurora inverter', 'Front porch wall, as it is now'],
@@ -607,8 +607,8 @@ const TITLES = {
 function setView(name) {
   const v = VIEWS[name];
   controls.target.set(...v.target);
-  // Portrait screens are narrow, so step back to keep the whole wall in frame.
-  const pullBack = camera.aspect < 1 && name !== 'plan' ? 1.45 : 1;
+  // Step back on screens narrower than the view was framed for, so labels stay in frame.
+  const pullBack = THREE.MathUtils.clamp(v.fitAspect / camera.aspect, 1, 1.5);
   camera.position.set(...v.pos).sub(controls.target).multiplyScalar(pullBack).add(controls.target);
   camera.fov = v.fov;
   camera.updateProjectionMatrix();
