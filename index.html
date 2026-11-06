@@ -8,7 +8,7 @@
 <style>
   :root {
     --ink: #1d2329; --muted: #5b6670; --line: #d5dbe0;
-    --new: #1f63d1; --remove: #c8372d; --dc: #e07b1f; --ac: #1f63d1;
+    --new: #1f63d1; --remove: #c8372d;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
@@ -35,9 +35,6 @@
   .toggle { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
   #title { display: none; position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
   #title strong { display: block; font-size: 17px; }
-  #legend { position: absolute; left: 12px; bottom: 12px; z-index: 2; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; display: grid; gap: 4px; }
-  #legend div { display: flex; align-items: center; gap: 8px; }
-  #legend i { display: inline-block; width: 22px; height: 0; border-top: 4px solid; border-radius: 2px; }
   #hint { position: absolute; right: 12px; bottom: 12px; z-index: 2; font-size: 12px; color: var(--muted); background: rgba(255,255,255,.85); padding: 4px 8px; border-radius: 6px; }
   .callout { background: #fff; border: 1px solid #c4ccd3; border-radius: 6px; padding: 4px 8px 5px; font-size: 12px; line-height: 1.3; box-shadow: 0 1px 4px rgba(0,0,0,.18); white-space: nowrap; }
   .callout { font-weight: 600; }
@@ -61,21 +58,24 @@
   #photo .count { color: #aab3bb; font-size: 12px; white-space: nowrap; }
   #photo button { background: #2b3238; color: #fff; border: 0; border-radius: 6px; padding: 6px 11px; font: inherit; cursor: pointer; }
   #photo button:focus-visible { outline: 2px solid #7fb2ff; outline-offset: 2px; }
-  #farView { position: absolute; right: 12px; bottom: 48px; z-index: 2; width: 150px; padding: 4px 4px 6px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.18); cursor: pointer; font: inherit; color: var(--ink); text-align: left; }
-  #farView img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 5px; }
-  #farView span { display: block; font-size: 12px; margin-top: 4px; }
-  #farView:hover, #farView:focus-visible { border-color: var(--new); outline: none; }
-  body.render #farView { bottom: 12px; }
+  #insets { position: absolute; right: 12px; top: 12px; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
+  .inset { width: 120px; padding: 4px 4px 6px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.18); cursor: pointer; font: inherit; color: var(--ink); text-align: left; }
+  .inset img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 5px; }
+  .inset span { display: block; font-size: 12px; margin-top: 4px; }
+  .inset:hover, .inset:focus-visible { border-color: var(--new); outline: none; }
   body.render #app { grid-template-columns: 1fr; }
   body.render #panel, body.render #toolbar, body.render #hint { display: none; }
   body.render #title { display: block; }
   @media (max-width: 820px) {
     #app { display: flex; flex-direction: column; height: auto; }
-    #stage { order: -1; height: 75vh; flex: none; }
+    #stage { order: -1; height: 72vh; flex: none; }
     #panel { border-right: 0; border-top: 1px solid var(--line); }
-    #legend, #hint { display: none; }
-    #farView { width: 96px; bottom: 12px; }
-    #farView span { font-size: 10px; }
+    #hint, .toggle { display: none; }
+    #toolbar { top: 8px; left: 8px; right: 8px; gap: 6px; }
+    .seg button { padding: 6px 10px; font-size: 13px; }
+    #insets { top: auto; right: auto; left: 8px; bottom: 8px; flex-direction: row; gap: 6px; }
+    .inset { width: 56px; padding: 2px; }
+    .inset span { display: none; }
     .photo-pin { width: 34px; height: 45px; }
     .callout { font-size: 10px; padding: 2px 5px; }
   }
@@ -90,26 +90,26 @@
 <body>
 <div id="app">
   <aside id="panel">
-    <h1>Solar inverter replacement</h1>
-    <p class="lead">Quote request. Front porch, single phase.</p>
+    <h1>Quote request</h1>
 
     <div id="gallery"></div>
 
+    <h2>Existing</h2>
+    <ul>
+      <li>Aurora inverter: 3.2 kW, 10.5 years old, faulty</li>
+      <li>Main switch: 32 A</li>
+    </ul>
+
     <h2>Job</h2>
     <ul>
-      <li>Replace the faulty Aurora inverter</li>
+      <li>Battery, with a hybrid inverter replacing the faulty one</li>
       <li>Add a sub-board (switchboard is full)</li>
-      <li>Reuse the solar isolators if compliant</li>
     </ul>
 
-    <h2>Quote to cover</h2>
+    <h2>Optional</h2>
     <ul>
-      <li>Inverter options and warranty</li>
-      <li>Sub-board location</li>
-      <li>Any isolator or meter box work</li>
+      <li>Quote with and without extra and/or replacement solar panels</li>
     </ul>
-
-    <p class="small">Measured: wall 2.85 m, height 2.28 m. Everything else is approximate.</p>
   </aside>
 
   <main id="stage">
@@ -127,14 +127,7 @@
       <label class="toggle"><input type="checkbox" id="showDims" checked> Measurements</label>
     </div>
     <div id="title"><strong></strong></div>
-    <div id="legend" aria-label="Legend">
-      <div><i style="border-color: var(--dc)"></i> DC cable</div>
-      <div><i style="border-color: var(--ac)"></i> AC cable</div>
-    </div>
-    <button type="button" id="farView" aria-label="Photo: from the front step">
-      <img src="photos/thumbs/porch-from-step.jpg" alt="">
-      <span>From the front step</span>
-    </button>
+    <div id="insets"></div>
     <div id="hint">Drag to rotate</div>
   </main>
 </div>
@@ -281,9 +274,17 @@ const newInverterTex = canvasTexture(400, 450, (g, w, h) => {
   g.fillStyle = '#2b3138'; g.beginPath(); g.roundRect(110, 170, 180, 80, 10); g.fill();
   g.fillStyle = '#7fb2ff'; g.fillRect(130, 190, 90, 8); g.fillRect(130, 206, 60, 8);
   for (let i = 0; i < 3; i++) { g.fillStyle = ['#4cc38a', '#f3b23c', '#e5e9ec'][i]; g.beginPath(); g.arc(240 + i * 16, 230, 5, 0, Math.PI * 2); g.fill(); }
-  g.fillStyle = '#1d2329'; g.font = 'bold 30px sans-serif'; g.textAlign = 'center'; g.fillText('NEW INVERTER', w / 2, 92);
+  g.fillStyle = '#1d2329'; g.font = 'bold 28px sans-serif'; g.textAlign = 'center'; g.fillText('HYBRID INVERTER', w / 2, 92);
   g.fillStyle = '#5b6670'; g.font = '20px sans-serif'; g.fillText('model to be selected', w / 2, 124);
   g.fillStyle = '#dfe4e8'; g.fillRect(0, h - 70, w, 70);
+});
+
+const batteryTex = canvasTexture(600, 1600, (g, w, h) => {
+  g.fillStyle = '#f6f8f9'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#1f63d1'; g.fillRect(0, 0, w, 20);
+  g.fillStyle = '#1d2329'; g.font = 'bold 56px sans-serif'; g.textAlign = 'center'; g.fillText('BATTERY', w / 2, 170);
+  g.fillStyle = '#5b6670'; g.font = '30px sans-serif'; g.fillText('size to be selected', w / 2, 220);
+  for (let i = 0; i < 4; i++) { g.fillStyle = i < 3 ? '#4cc38a' : '#dfe4e8'; g.fillRect(w / 2 - 90 + i * 48, 300, 36, 12); }
 });
 
 const mat = (color, roughness = 0.8, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, ...extra });
@@ -322,6 +323,7 @@ const M = {
   aurora: mat('#ffffff', 0.6, { map: auroraTex }),
   newSide: mat('#eef1f3', 0.5),
   newFront: mat('#ffffff', 0.5, { map: newInverterTex }),
+  batteryFront: mat('#ffffff', 0.5, { map: batteryTex }),
   lid: mat('#a9bfd0', 0.2, { transparent: true, opacity: 0.45 }),
   ghost: mat('#c8372d', 1, { transparent: true, opacity: 0.08, depthWrite: false }),
   dot: mat('#2b333a', 0.6),
@@ -459,7 +461,7 @@ for (const ext of [
 ]) addBox(ext, M.white);
 addBox([0.36, 0.43, 0.80, 0.86, 1.70, 3.70], M.cap);
 
-// Eaves and porch roof (corrugated steel on a steel frame), hidden when looking from above
+// Eaves and porch roof (corrugated steel on a steel frame), see-through when looking from above
 const roof = new THREE.Group();
 scene.add(roof);
 addBox([0, 3.3, 2.28, 2.31, 0, 0.45], M.white, roof);
@@ -475,26 +477,34 @@ for (const ext of [
 ]) addBox(ext, M.channel, roof);
 addBox([3.21, 3.29, 0, 2.36, 2.52, 2.60], M.galv);
 
+// The roof gets its own materials so it can turn see-through without affecting the rest of the house.
+const roofMaterials = [];
+roof.traverse((o) => {
+  if (!o.isMesh) return;
+  o.material = Array.isArray(o.material) ? o.material.map((m) => m.clone()) : o.material.clone();
+  roofMaterials.push(...[o.material].flat());
+});
+let roofSeeThrough = false;
+function setRoofSeeThrough(on) {
+  if (on === roofSeeThrough) return;
+  roofSeeThrough = on;
+  for (const m of roofMaterials) {
+    Object.assign(m, { transparent: on, opacity: on ? 0.22 : 1, depthWrite: !on });
+    m.needsUpdate = true;
+  }
+}
+
 // Clicking a part of the model tagged with a photo id opens that site photo.
 const tag = (object, photo) => { object.userData.photo = photo; return object; };
 const photoGroup = (photo, parent = scene) => { const g = tag(new THREE.Group(), photo); parent.add(g); return g; };
 
-// Front door: timber door behind a security screen door hinged on the corner side
+// Front door: timber door behind a security screen door
 for (const ext of [[-0.11, 0, 0, 2.10, 0.24, 0.29], [-0.11, 0, 0, 2.10, 1.25, 1.30], [-0.11, 0, 2.05, 2.10, 0.24, 1.30]]) addBox(ext, M.white);
 addBox([-0.11, -0.10, 0.05, 2.05, 0.29, 1.25], M.timber);
 addBox([-0.06, -0.035, 0.05, 2.04, 0.30, 1.24], [M.screen, M.bronze, M.bronze, M.bronze, M.bronze, M.bronze]);
 addBox([-0.035, -0.012, 0.98, 1.10, 1.13, 1.16], M.toggle);
 addBox([-0.11, 0.03, 0, 0.045, 0.24, 1.30], M.threshold);
 addBox([0.05, 0.50, 0, 0.012, 0.42, 1.18], M.mat);
-
-const hinge = new THREE.Vector3(-0.045, 0.008, 0.30);
-const swing = [];
-for (let i = 0; i <= 24; i++) {
-  const a = (i / 24) * Math.PI / 2;
-  swing.push(new THREE.Vector3(hinge.x + 0.94 * Math.sin(a), 0.008, hinge.z + 0.94 * Math.cos(a)));
-}
-fatLine(swing, '#6b747c', 1.5, { dashed: true });
-fatLine([hinge, swing.at(-1)], '#6b747c', 1.5, { dashed: true });
 
 // ---------- Equipment on the back wall ----------
 // Meter box, door open, with the meter above the main switchboard
@@ -521,7 +531,7 @@ meterBox.add(meterDoor);
 addBox([-0.36, 0, -0.32, 0.32, 0, 0.018], [M.cream, M.cream, M.cream, M.cream, M.cream, M.timber], meterDoor);
 
 // Solar isolators: left enclosure, and the labelled DC isolator nearer the inverter
-const isolators = photoGroup('isolators-and-conduit');
+const isolators = photoGroup('porch-overview');
 for (const [x0, x1] of [[0.95, 1.065], [1.075, 1.19]]) {
   addBox([x0, x1, 1.56, 1.78, 0, 0.10], M.enclosure, isolators);
   addBox([x0 + 0.015, x1 - 0.015, 1.60, 1.73, 0.10, 0.104], M.enclosureWindow, isolators);
@@ -530,7 +540,7 @@ for (const [x0, x1] of [[0.95, 1.065], [1.075, 1.19]]) {
 addBox([1.085, 1.18, 1.745, 1.772, 0.10, 0.103], M.sticker, isolators);
 
 // Porch light
-const lamp = photoGroup('inverter-and-light');
+const lamp = photoGroup('porch-overview');
 const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.02, 24), M.brass);
 plate.rotation.x = Math.PI / 2;
 plate.position.set(1.20, 1.96, 0.01);
@@ -547,22 +557,34 @@ lamp.add(lampRoof);
 const existing = new THREE.Group();
 const proposed = new THREE.Group();
 scene.add(existing, proposed);
+existing.add(isolators);
 
 const OLD_INVERTER = [1.285, 1.615, 1.42, 2.02, 0.012, 0.222];
-const oldInverter = photoGroup('inverter-and-light', existing);
+const oldInverter = photoGroup('porch-overview', existing);
 addBox([1.33, 1.57, 1.36, 1.43, 0, 0.012], M.inverterSide, oldInverter);
 addBox(OLD_INVERTER, [M.inverterSide, M.inverterSide, M.inverterSide, M.inverterSide, M.aurora, M.inverterSide], oldInverter);
-const oldConduits = photoGroup('isolators-and-conduit', existing);
+const oldConduits = photoGroup('porch-overview', existing);
 conduit([[1.008, 1.56, 0.03], [1.008, 1.335, 0.03], [1.56, 1.335, 0.03], [1.56, 1.42, 0.03]], '#b9bcbc', oldConduits);
 conduit([[1.13, 1.56, 0.06], [1.13, 1.365, 0.06], [1.48, 1.365, 0.06], [1.48, 1.42, 0.06]], '#b9bcbc', oldConduits);
 
-const ghost = tag(addBox(OLD_INVERTER, M.ghost, proposed), 'inverter-and-light');
+const ghost = tag(addBox(OLD_INVERTER, M.ghost, proposed), 'porch-overview');
 ghost.castShadow = false;
 outline(ghost, '#c8372d', 2, { dashed: true, parent: proposed });
 
+// Most new inverters have the DC isolator built in, so the wall isolators can usually go.
+const isolatorGhost = tag(addBox([0.95, 1.19, 1.56, 1.78, 0, 0.10], M.ghost, proposed), 'porch-overview');
+isolatorGhost.castShadow = false;
+outline(isolatorGhost, '#c8372d', 2, { dashed: true, parent: proposed });
+
 const NEW_INVERTER = [1.25, 1.65, 1.40, 1.85, 0.012, 0.18];
-const newInverter = tag(addBox(NEW_INVERTER, [M.newSide, M.newSide, M.newSide, M.newSide, M.newFront, M.newSide], proposed), 'inverter-and-light');
+const newInverter = tag(addBox(NEW_INVERTER, [M.newSide, M.newSide, M.newSide, M.newSide, M.newFront, M.newSide], proposed), 'porch-overview');
 outline(newInverter, '#1f63d1', 2.5, { parent: proposed });
+
+// Indicative only: battery placement rules may put it elsewhere.
+const BATTERY = [1.75, 2.35, 0, 1.60, 0, 0.22];
+const battery = addBox(BATTERY, [M.newSide, M.newSide, M.newSide, M.newSide, M.batteryFront, M.newSide], proposed);
+outline(battery, '#1f63d1', 2.5, { parent: proposed });
+conduit([[1.75, 1.50, 0.08], [1.65, 1.50, 0.08]], '#e07b1f', proposed);
 
 const SUB_BOARD = [0.25, 0.51, 0.94, 1.23, 0, 0.11];
 addBox(SUB_BOARD, M.enclosure, proposed);
@@ -575,40 +597,36 @@ for (let i = 0; i < 8; i++) {
 }
 outline(addBox([0.25, 0.51, 0.94, 1.23, 0, 0.13], new THREE.MeshBasicMaterial({ visible: false }), proposed), '#1f63d1', 2.5, { parent: proposed });
 
-conduit([[1.13, 1.56, 0.04], [1.13, 1.33, 0.04], [1.55, 1.33, 0.04], [1.55, 1.40, 0.04]], '#e07b1f', proposed);
+conduit([[1.13, 1.56, 0.04], [1.13, 1.33, 0.04], [1.40, 1.33, 0.04], [1.40, 1.40, 0.04]], '#e07b1f', proposed);
 conduit([[1.28, 1.40, 0.03], [1.28, 1.08, 0.03], [0.51, 1.08, 0.03]], '#1f63d1', proposed);
 conduit([[0.38, 1.23, 0.06], [0.38, 1.30, 0.06]], '#1f63d1', proposed);
 
 // ---------- Labels ----------
 const SHARED = [
   { title: 'Switchboard (full)', status: 'existing', anchor: [0.38, 1.46, 0.10], at: [0.30, 2.12, 0.75] },
-  { title: 'Solar isolators', status: 'existing', anchor: [1.07, 1.76, 0.10], at: [0.85, 2.32, 0.65] },
-  { title: 'Screen door swing', status: 'existing', anchor: swing[12].toArray(), at: [0.95, 0.22, 1.55] },
 ];
 for (const parent of [existing, proposed]) for (const c of SHARED) callout({ ...c, parent });
 
-callout({ title: 'Aurora inverter', status: 'faulty', anchor: [1.615, 1.80, 0.22], at: [2.35, 1.95, 0.55], parent: existing });
-callout({ title: 'Existing cables', status: 'existing', anchor: [1.34, 1.375, 0.04], at: [2.2, 1.12, 0.6], parent: existing });
+callout({ title: 'Aurora inverter, 3.2 kW', status: 'faulty', anchor: [1.615, 1.80, 0.22], at: [2.35, 1.95, 0.55], parent: existing });
 
-callout({ title: 'Aurora inverter', status: 'remove', anchor: [1.615, 2.0, 0.222], at: [2.4, 2.25, 0.45], parent: proposed });
-callout({ title: 'New inverter', status: 'new', anchor: [1.65, 1.62, 0.18], at: [2.45, 1.72, 0.55], parent: proposed });
-callout({ title: 'New DC cable', status: 'new', anchor: [1.42, 1.33, 0.04], at: [2.25, 1.12, 0.6], parent: proposed });
-callout({ title: 'New AC cable', status: 'new', anchor: [0.85, 1.08, 0.03], at: [1.0, 0.68, 0.75], parent: proposed });
-callout({ title: 'New sub-board', status: 'new', anchor: [0.38, 1.0, 0.13], at: [-0.05, 0.80, 0.9], parent: proposed });
+callout({ title: 'Aurora inverter, 3.2 kW', status: 'remove', anchor: [1.615, 2.0, 0.222], at: [2.4, 2.25, 0.45], parent: proposed });
+callout({ title: 'New hybrid inverter', status: 'new', anchor: [1.65, 1.75, 0.18], at: [2.45, 1.95, 0.55], parent: proposed });
+callout({ title: 'Solar isolators', status: 'existing', anchor: [1.07, 1.76, 0.10], at: [0.85, 2.32, 0.65], parent: existing });
+callout({ title: 'Solar isolators (if built into inverter)', status: 'remove', anchor: [1.07, 1.76, 0.10], at: [1.15, 2.50, 0.65], parent: proposed });
+callout({ title: 'New battery (location TBC)', status: 'new', anchor: [2.35, 0.90, 0.22], at: [2.80, 0.80, 0.5], parent: proposed });
+callout({ title: 'New sub-board', status: 'new', anchor: [0.38, 0.97, 0.13], at: [0.40, 0.72, 0.35], parent: proposed });
 
 // ---------- Measured dimensions ----------
 dimension([0, 0.25, 0.04], [2.85, 0.25, 0.04], '2.85 m', [0, 1, 0]);
 dimension([0.03, 0, 0.03], [0.03, 2.28, 0.03], '2.28 m', [1, 0, 0]);
 
 // ---------- Site photos ----------
-// A pin places a camera marker on the model where the photo was taken.
+// A pin places a thumbnail on the model beside what the photo shows; an inset pins it to the corner of the view.
 const PHOTOS = [
-  { id: 'porch-from-step', caption: 'From the front step' },
-  { id: 'porch-overview', caption: 'Porch wall' },
+  { id: 'porch-from-step', caption: 'From the front step', inset: true },
+  { id: 'roof', caption: 'Roof (Google Maps)', inset: true },
+  { id: 'porch-overview', caption: 'Porch wall', pin: [1.85, 2.05, 0.05] },
   { id: 'meter-box-inside', caption: 'Meter box: switchboard full', pin: [0.38, 2.08, 0.05] },
-  { id: 'corner-height', caption: 'Height: 2.28 m', pin: [0.08, 0.55, 0.06] },
-  { id: 'isolators-and-conduit', caption: 'Isolators and conduit', pin: [0.82, 1.45, 0.05] },
-  { id: 'inverter-and-light', caption: 'Aurora inverter. Wall: 2.85 m', pin: [1.85, 2.05, 0.05] },
 ];
 
 const dialog = document.getElementById('photo');
@@ -632,25 +650,30 @@ dialog.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') showPhoto(photoIndex + 1);
 });
 
-document.getElementById('farView').addEventListener('click', () => openPhoto('porch-from-step'));
+function photoButton(p, className) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = className;
+  b.setAttribute('aria-label', `Photo: ${p.caption}`);
+  b.innerHTML = `<img src="photos/thumbs/${p.id}.jpg" alt="">${className === 'inset' ? `<span>${p.caption}</span>` : ''}`;
+  b.addEventListener('click', () => openPhoto(p.id));
+  return b;
+}
 
 const gallery = document.getElementById('gallery');
+const insets = document.getElementById('insets');
 for (const p of PHOTOS) {
   const thumb = document.createElement('button');
   thumb.type = 'button';
   thumb.innerHTML = `<img src="photos/thumbs/${p.id}.jpg" alt="${p.caption}" loading="lazy">`;
   thumb.addEventListener('click', () => openPhoto(p.id));
   gallery.append(thumb);
-  if (!p.pin) continue;
-  const pin = document.createElement('button');
-  pin.type = 'button';
-  pin.className = 'photo-pin';
-  pin.setAttribute('aria-label', `Photo: ${p.caption}`);
-  pin.innerHTML = `<img src="photos/thumbs/${p.id}.jpg" alt="">`;
-  pin.addEventListener('click', () => openPhoto(p.id));
-  const marker = new CSS2DObject(pin);
-  marker.position.set(...p.pin);
-  scene.add(marker);
+  if (p.inset) insets.append(photoButton(p, 'inset'));
+  if (p.pin) {
+    const marker = new CSS2DObject(photoButton(p, 'photo-pin'));
+    marker.position.set(...p.pin);
+    scene.add(marker);
+  }
 }
 
 // A click (not a drag) on tagged equipment opens its photo.
@@ -682,18 +705,20 @@ renderer.domElement.addEventListener('pointermove', (e) => {
 
 // ---------- UI ----------
 const VIEWS = {
-  overview: { pos: [2.55, 1.7, 3.75], target: [0.95, 1.2, 0.3], fov: 50, fitAspect: 1.2 },
-  wall: { pos: [1.42, 1.25, 3.7], target: [1.42, 1.25, 0], fov: 42, fitAspect: 1.6 },
+  overview: { pos: [2.55, 1.7, 3.75], target: [0.95, 1.2, 0.3], fov: 50, fitAspect: 1.2, portraitShift: 0.4 },
+  wall: { pos: [1.42, 1.25, 3.7], target: [1.42, 1.25, 0], fov: 42, fitAspect: 1.6, portraitShift: 0.1 },
   plan: { pos: [1.3, 16, 1.205], target: [1.3, 0, 1.2], fov: 13, fitAspect: 1 },
 };
-const TITLES = { existing: 'Existing: faulty inverter', proposed: 'Proposed: new inverter and sub-board' };
+const TITLES = { existing: 'Existing: faulty inverter', proposed: 'Proposed: battery, hybrid inverter and sub-board' };
 
 function setView(name) {
   const v = VIEWS[name];
-  controls.target.set(...v.target);
+  // Portrait screens are narrow, so centre on the wall and its labels rather than the door.
+  const shift = camera.aspect < 1 ? v.portraitShift ?? 0 : 0;
+  controls.target.set(...v.target).x += shift;
   // Step back on screens narrower than the view was framed for, so labels stay in frame.
-  const pullBack = THREE.MathUtils.clamp(v.fitAspect / camera.aspect, 1, 1.5);
-  camera.position.set(...v.pos).sub(controls.target).multiplyScalar(pullBack).add(controls.target);
+  const pullBack = THREE.MathUtils.clamp(v.fitAspect / camera.aspect, 1, 1.6);
+  camera.position.set(...v.pos).setX(v.pos[0] + shift).sub(controls.target).multiplyScalar(pullBack).add(controls.target);
   camera.fov = v.fov;
   camera.updateProjectionMatrix();
   controls.update();
@@ -726,16 +751,29 @@ resize();
 setMode(params.get('mode') === 'existing' ? 'existing' : 'proposed');
 setView(VIEWS[params.get('view')] ? params.get('view') : 'overview');
 
+// CSS2DRenderer rewrites each label's transform every frame, so this nudge does not accumulate.
+function keepLabelsInView() {
+  const box = stage.getBoundingClientRect();
+  for (const el of labelRenderer.domElement.querySelectorAll('.callout, .dim')) {
+    if (!el.offsetParent) continue;
+    const r = el.getBoundingClientRect();
+    const left = r.left - box.left, right = r.right - box.left;
+    const shift = left < 4 ? 4 - left : right > box.width - 4 ? box.width - 4 - right : 0;
+    if (shift) el.style.transform += ` translateX(${shift}px)`;
+  }
+}
+
 let frames = 0;
 renderer.setAnimationLoop(() => {
   controls.update();
   const above = camera.position.y > 2.45;
-  roof.visible = !above;
+  setRoofSeeThrough(above);
   for (const d of dims.children) if (d.userData.vertical) d.visible = !above;
   // Callouts point at wall-mounted equipment, which reads poorly from directly above.
   for (const c of callouts) c.visible = calloutToggle.checked && !above;
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
+  keepLabelsInView();
   if (++frames === 3) window.modelReady = true;
 });
 </script>
