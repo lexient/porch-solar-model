@@ -35,25 +35,21 @@
   .toggle { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
   #title { display: none; position: absolute; top: 14px; left: 14px; z-index: 2; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
   #title strong { display: block; font-size: 17px; }
-  #title span { color: var(--muted); font-size: 13px; }
   #legend { position: absolute; left: 12px; bottom: 12px; z-index: 2; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; display: grid; gap: 4px; }
   #legend div { display: flex; align-items: center; gap: 8px; }
   #legend i { display: inline-block; width: 22px; height: 0; border-top: 4px solid; border-radius: 2px; }
   #hint { position: absolute; right: 12px; bottom: 12px; z-index: 2; font-size: 12px; color: var(--muted); background: rgba(255,255,255,.85); padding: 4px 8px; border-radius: 6px; }
   .callout { background: #fff; border: 1px solid #c4ccd3; border-radius: 6px; padding: 4px 8px 5px; font-size: 12px; line-height: 1.3; box-shadow: 0 1px 4px rgba(0,0,0,.18); white-space: nowrap; }
-  .callout .t { font-weight: 600; }
-  .callout .s { color: var(--muted); }
+  .callout { font-weight: 600; }
   .chip { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em; padding: 0 5px; border-radius: 4px; margin-right: 5px; vertical-align: 1px; }
   .chip.existing { background: #e6e9ec; color: #3b4650; }
   .chip.faulty, .chip.remove { background: #fbe3e1; color: #a32a22; }
   .chip.new { background: #dce8fd; color: #174ea6; }
   .dim { background: #1d2329; color: #fff; font-size: 11px; font-weight: 600; padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
-  .photo-pin { pointer-events: auto; width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 2px solid #fff; background: #1d2329; color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
-  .photo-pin svg { width: 16px; height: 16px; }
-  .photo-pin:hover, .photo-pin:focus-visible { background: var(--new); outline: none; }
-  #legend .photo-key .photo-pin { width: 22px; height: 22px; border-width: 1px; box-shadow: none; cursor: default; }
-  #legend .photo-key .photo-pin svg { width: 12px; height: 12px; }
-  #gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .photo-pin { pointer-events: auto; width: 48px; height: 64px; padding: 0; border: 2px solid #fff; border-radius: 6px; overflow: hidden; background: #ccd3d8; cursor: pointer; box-shadow: 0 1px 5px rgba(0,0,0,.4); }
+  .photo-pin img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .photo-pin:hover, .photo-pin:focus-visible { border-color: var(--new); outline: none; }
+  #gallery { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   #gallery button { padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: pointer; background: #f2f4f5; aspect-ratio: 3 / 4; }
   #gallery img { display: block; width: 100%; height: 100%; object-fit: cover; }
   #gallery button:focus-visible { outline: 2px solid var(--new); outline-offset: 2px; }
@@ -65,7 +61,11 @@
   #photo .count { color: #aab3bb; font-size: 12px; white-space: nowrap; }
   #photo button { background: #2b3238; color: #fff; border: 0; border-radius: 6px; padding: 6px 11px; font: inherit; cursor: pointer; }
   #photo button:focus-visible { outline: 2px solid #7fb2ff; outline-offset: 2px; }
-  body.render .photo-pin, body.render .photo-key { display: none !important; }
+  #farView { position: absolute; right: 12px; bottom: 48px; z-index: 2; width: 150px; padding: 4px 4px 6px; background: #fff; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.18); cursor: pointer; font: inherit; color: var(--ink); text-align: left; }
+  #farView img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 5px; }
+  #farView span { display: block; font-size: 12px; margin-top: 4px; }
+  #farView:hover, #farView:focus-visible { border-color: var(--new); outline: none; }
+  body.render #farView { bottom: 12px; }
   body.render #app { grid-template-columns: 1fr; }
   body.render #panel, body.render #toolbar, body.render #hint { display: none; }
   body.render #title { display: block; }
@@ -74,8 +74,10 @@
     #stage { order: -1; height: 75vh; flex: none; }
     #panel { border-right: 0; border-top: 1px solid var(--line); }
     #legend, #hint { display: none; }
+    #farView { width: 96px; bottom: 12px; }
+    #farView span { font-size: 10px; }
+    .photo-pin { width: 34px; height: 45px; }
     .callout { font-size: 10px; padding: 2px 5px; }
-    .callout .s { display: none; }
   }
 </style>
 <script type="importmap">
@@ -88,60 +90,26 @@
 <body>
 <div id="app">
   <aside id="panel">
-    <h1>Solar inverter replacement: quote request</h1>
-    <p class="lead">Front porch wall. Single-phase supply on the United Energy network. Use the buttons on the model to switch between the existing setup and the proposed work.</p>
+    <h1>Solar inverter replacement</h1>
+    <p class="lead">Quote request. Front porch, single phase.</p>
 
-    <h2>Site photos</h2>
-    <p class="small">Click a camera marker on the model, or the meter box, isolators, inverter, light or front door, to see the real photo.</p>
     <div id="gallery"></div>
 
-    <h2>Work required</h2>
-    <ol>
-      <li>Remove the faulty Power-One Aurora inverter from the porch wall.</li>
-      <li>Supply and install a new grid-connected inverter, sized to suit the existing roof panels, on the same wall.</li>
-      <li>Connect the existing panels to the new inverter through the existing solar isolators, or replace the isolators if they no longer comply.</li>
-      <li>Install a new sub-board beside the meter box for the solar supply. The main switchboard has no spare space.</li>
-      <li>Test, label, update the shutdown procedure and signage, and lodge the network and safety paperwork.</li>
-    </ol>
-
-    <h2>Please include in the quote</h2>
+    <h2>Job</h2>
     <ul>
-      <li>Inverter brand, model, size and warranty (options welcome).</li>
-      <li>Whether the existing isolators, on the wall and on the roof, can stay or need replacing.</li>
-      <li>Where you would put the sub-board and what goes in it.</li>
-      <li>Any work inside the meter box. The backing sheet looks original, so say if it needs testing before drilling.</li>
-      <li>Whether the new inverter needs a Wi-Fi connection to meet Victoria's emergency backstop rules.</li>
-      <li>Optional: a price for a battery-ready (hybrid) inverter instead.</li>
+      <li>Replace the faulty Aurora inverter</li>
+      <li>Add a sub-board (switchboard is full)</li>
+      <li>Reuse the solar isolators if compliant</li>
     </ul>
 
-    <h2>On site now</h2>
+    <h2>Quote to cover</h2>
     <ul>
-      <li>Meter: i-Credit 500, single phase, owned by United Energy.</li>
-      <li>Main switchboard (in the meter box): normal supply main switch, RCD, circuit breakers for power, lights, oven and A/C, and a 20 A solar supply main switch. No spare poles.</li>
-      <li>Two isolator enclosures to the left of the inverter; one is labelled "Solar DC isolator".</li>
-      <li>The switchboard label says the array isolator is on the roof.</li>
-      <li>An energy monitor sensor is clipped to the meter. Please leave it in place.</li>
+      <li>Inverter options and warranty</li>
+      <li>Sub-board location</li>
+      <li>Any isolator or meter box work</li>
     </ul>
 
-    <h2>Measurements</h2>
-    <table>
-      <tr><td>Porch back wall width</td><td>2.85 m</td></tr>
-      <tr><td>Floor to eave lining, at the corner</td><td>2.28 m</td></tr>
-      <tr><td>Floor to conduit under the inverter</td><td>1.33 m</td></tr>
-      <tr><td>Front door opening, brick to brick</td><td>1.06 m</td></tr>
-      <tr><td>Brick return beside the door</td><td>0.36 m</td></tr>
-    </table>
-    <p class="small">Measured on site with a phone. Other positions and sizes in the model are estimated from photos.</p>
-
-    <h2>Site notes</h2>
-    <ul>
-      <li>The porch light sits just above the inverter's top-left corner. Check the new inverter's clearances; the light may need moving or the inverter mounting lower.</li>
-      <li>The security screen door is hinged on the meter box side and opens out across the meter box. Anything new on that part of the wall needs to stay shallow (estimated under 250 mm from the brick) so the door still opens.</li>
-      <li>The wall is under the porch roof, out of direct rain and midday sun.</li>
-      <li>The pot plants under the inverter can be moved for the work.</li>
-    </ul>
-
-    <p class="small" style="margin-top:22px">This model is indicative only and is not a construction drawing. Drag to rotate, scroll or pinch to zoom, right-drag or two-finger drag to pan.</p>
+    <p class="small">Measured: wall 2.85 m, height 2.28 m. Everything else is approximate.</p>
   </aside>
 
   <main id="stage">
@@ -158,16 +126,16 @@
       <label class="toggle"><input type="checkbox" id="showCallouts" checked> Labels</label>
       <label class="toggle"><input type="checkbox" id="showDims" checked> Measurements</label>
     </div>
-    <div id="title"><strong></strong><span></span></div>
+    <div id="title"><strong></strong></div>
     <div id="legend" aria-label="Legend">
-      <div><i style="border-color: var(--dc)"></i> New DC cable (panels to inverter)</div>
-      <div><i style="border-color: var(--ac)"></i> New AC cable (inverter to switchboard)</div>
-      <div><i style="border-color: #9aa0a3"></i> Existing conduit</div>
-      <div><i style="border-color: var(--remove); border-top-style: dashed"></i> To be removed</div>
-      <div><i style="border-color: #1d2329; border-top-width: 2px"></i> Measured on site</div>
-      <div class="photo-key"><span class="photo-pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9Zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg></span> Real photo, click to open</div>
+      <div><i style="border-color: var(--dc)"></i> DC cable</div>
+      <div><i style="border-color: var(--ac)"></i> AC cable</div>
     </div>
-    <div id="hint">Drag to rotate, scroll to zoom, right-drag to pan. Click a camera for a photo.</div>
+    <button type="button" id="farView" aria-label="Photo: from the front step">
+      <img src="photos/thumbs/porch-from-step.jpg" alt="">
+      <span>From the front step</span>
+    </button>
+    <div id="hint">Drag to rotate</div>
   </main>
 </div>
 
@@ -428,10 +396,10 @@ function conduit(points, color, parent, radius = 0.012) {
 
 const STATUS = { existing: 'EXISTING', faulty: 'FAULTY', remove: 'REMOVE', new: 'NEW' };
 const callouts = [];
-function callout({ title, sub, status, anchor, at, parent }) {
+function callout({ title, status, anchor, at, parent }) {
   const el = document.createElement('div');
   el.className = 'callout';
-  el.innerHTML = `<div class="t"><span class="chip ${status}">${STATUS[status]}</span>${title}</div>${sub ? `<div class="s">${sub}</div>` : ''}`;
+  el.innerHTML = `<span class="chip ${status}">${STATUS[status]}</span>${title}`;
   const a = new THREE.Vector3(...anchor), b = new THREE.Vector3(...at);
   const label = new CSS2DObject(el);
   label.position.copy(b);
@@ -512,13 +480,12 @@ const tag = (object, photo) => { object.userData.photo = photo; return object; }
 const photoGroup = (photo, parent = scene) => { const g = tag(new THREE.Group(), photo); parent.add(g); return g; };
 
 // Front door: timber door behind a security screen door hinged on the corner side
-const door = photoGroup('front-door-opening');
-for (const ext of [[-0.11, 0, 0, 2.10, 0.24, 0.29], [-0.11, 0, 0, 2.10, 1.25, 1.30], [-0.11, 0, 2.05, 2.10, 0.24, 1.30]]) addBox(ext, M.white, door);
-addBox([-0.11, -0.10, 0.05, 2.05, 0.29, 1.25], M.timber, door);
-addBox([-0.06, -0.035, 0.05, 2.04, 0.30, 1.24], [M.screen, M.bronze, M.bronze, M.bronze, M.bronze, M.bronze], door);
-addBox([-0.035, -0.012, 0.98, 1.10, 1.13, 1.16], M.toggle, door);
-addBox([-0.11, 0.03, 0, 0.045, 0.24, 1.30], M.threshold, door);
-addBox([0.05, 0.50, 0, 0.012, 0.42, 1.18], M.mat, door);
+for (const ext of [[-0.11, 0, 0, 2.10, 0.24, 0.29], [-0.11, 0, 0, 2.10, 1.25, 1.30], [-0.11, 0, 2.05, 2.10, 0.24, 1.30]]) addBox(ext, M.white);
+addBox([-0.11, -0.10, 0.05, 2.05, 0.29, 1.25], M.timber);
+addBox([-0.06, -0.035, 0.05, 2.04, 0.30, 1.24], [M.screen, M.bronze, M.bronze, M.bronze, M.bronze, M.bronze]);
+addBox([-0.035, -0.012, 0.98, 1.10, 1.13, 1.16], M.toggle);
+addBox([-0.11, 0.03, 0, 0.045, 0.24, 1.30], M.threshold);
+addBox([0.05, 0.50, 0, 0.012, 0.42, 1.18], M.mat);
 
 const hinge = new THREE.Vector3(-0.045, 0.008, 0.30);
 const swing = [];
@@ -614,40 +581,34 @@ conduit([[0.38, 1.23, 0.06], [0.38, 1.30, 0.06]], '#1f63d1', proposed);
 
 // ---------- Labels ----------
 const SHARED = [
-  { title: 'Meter box and main switchboard', sub: 'Switchboard full: no spare poles', status: 'existing', anchor: [0.38, 1.46, 0.10], at: [0.30, 2.12, 0.75] },
-  { title: 'Solar isolators', sub: 'One labelled "Solar DC isolator"', status: 'existing', anchor: [1.07, 1.76, 0.10], at: [0.85, 2.32, 0.65] },
-  { title: 'Screen door swing', sub: 'Opens across the meter box', status: 'existing', anchor: swing[12].toArray(), at: [0.95, 0.22, 1.55] },
+  { title: 'Switchboard (full)', status: 'existing', anchor: [0.38, 1.46, 0.10], at: [0.30, 2.12, 0.75] },
+  { title: 'Solar isolators', status: 'existing', anchor: [1.07, 1.76, 0.10], at: [0.85, 2.32, 0.65] },
+  { title: 'Screen door swing', status: 'existing', anchor: swing[12].toArray(), at: [0.95, 0.22, 1.55] },
 ];
 for (const parent of [existing, proposed]) for (const c of SHARED) callout({ ...c, parent });
 
-callout({ title: 'Aurora inverter', sub: 'Faulty, needs replacing', status: 'faulty', anchor: [1.615, 1.80, 0.22], at: [2.35, 1.95, 0.55], parent: existing });
-callout({ title: 'Existing cables to inverter', sub: 'From the isolators', status: 'existing', anchor: [1.34, 1.375, 0.04], at: [2.2, 1.12, 0.6], parent: existing });
+callout({ title: 'Aurora inverter', status: 'faulty', anchor: [1.615, 1.80, 0.22], at: [2.35, 1.95, 0.55], parent: existing });
+callout({ title: 'Existing cables', status: 'existing', anchor: [1.34, 1.375, 0.04], at: [2.2, 1.12, 0.6], parent: existing });
 
-callout({ title: 'Aurora inverter', sub: 'Remove and dispose', status: 'remove', anchor: [1.615, 2.0, 0.222], at: [2.4, 2.25, 0.45], parent: proposed });
-callout({ title: 'New inverter', sub: 'Sized to the existing panels', status: 'new', anchor: [1.65, 1.62, 0.18], at: [2.45, 1.72, 0.55], parent: proposed });
-callout({ title: 'New DC cable', sub: 'DC isolator to inverter', status: 'new', anchor: [1.42, 1.33, 0.04], at: [2.25, 1.12, 0.6], parent: proposed });
-callout({ title: 'New AC cable', sub: 'Inverter to sub-board (route indicative)', status: 'new', anchor: [0.85, 1.08, 0.03], at: [1.0, 0.68, 0.75], parent: proposed });
-callout({ title: 'New sub-board', sub: 'Solar supply main switch and meter', status: 'new', anchor: [0.38, 1.0, 0.13], at: [-0.05, 0.80, 0.9], parent: proposed });
+callout({ title: 'Aurora inverter', status: 'remove', anchor: [1.615, 2.0, 0.222], at: [2.4, 2.25, 0.45], parent: proposed });
+callout({ title: 'New inverter', status: 'new', anchor: [1.65, 1.62, 0.18], at: [2.45, 1.72, 0.55], parent: proposed });
+callout({ title: 'New DC cable', status: 'new', anchor: [1.42, 1.33, 0.04], at: [2.25, 1.12, 0.6], parent: proposed });
+callout({ title: 'New AC cable', status: 'new', anchor: [0.85, 1.08, 0.03], at: [1.0, 0.68, 0.75], parent: proposed });
+callout({ title: 'New sub-board', status: 'new', anchor: [0.38, 1.0, 0.13], at: [-0.05, 0.80, 0.9], parent: proposed });
 
 // ---------- Measured dimensions ----------
 dimension([0, 0.25, 0.04], [2.85, 0.25, 0.04], '2.85 m', [0, 1, 0]);
 dimension([0.03, 0, 0.03], [0.03, 2.28, 0.03], '2.28 m', [1, 0, 0]);
-dimension([1.40, 0, 0.03], [1.40, 1.33, 0.03], '1.33 m', [1, 0, 0]);
-dimension([0.015, 0.07, 0.24], [0.015, 0.07, 1.30], '1.06 m', [1, 0, 0]);
-dimension([0, 0.07, 1.345], [0.36, 0.07, 1.345], '0.36 m', [0, 0, 1]);
 
 // ---------- Site photos ----------
 // A pin places a camera marker on the model where the photo was taken.
 const PHOTOS = [
-  { id: 'porch-overview', caption: 'Porch wall: front door, meter box, isolators and Aurora inverter.' },
-  { id: 'porch-from-step', caption: 'Porch from the front step, with the front room window on the left.' },
-  { id: 'porch-from-garden', caption: 'Porch roof and wall from the garden side.' },
-  { id: 'meter-box-inside', caption: 'Inside the meter box: the meter, with the full main switchboard below it.', pin: [0.38, 1.72, 0.22] },
-  { id: 'corner-height', caption: 'Corner beside the front door. Floor to eave lining: 2.28 m.', pin: [0.04, 2.12, 0.06] },
-  { id: 'isolators-and-conduit', caption: 'Isolators and conduit under the inverter. Floor to conduit: 1.33 m.', pin: [0.92, 1.42, 0.08] },
-  { id: 'inverter-and-light', caption: 'Aurora inverter, porch light and DC isolator. Back wall width: 2.85 m.', pin: [1.72, 2.10, 0.12] },
-  { id: 'front-door-opening', caption: 'Front door. Opening, brick to brick: 1.06 m.', pin: [0, 1.55, 0.78] },
-  { id: 'brick-return', caption: 'Brick return beside the front door: 0.36 m.', pin: [0.18, 0.35, 1.35] },
+  { id: 'porch-from-step', caption: 'From the front step' },
+  { id: 'porch-overview', caption: 'Porch wall' },
+  { id: 'meter-box-inside', caption: 'Meter box: switchboard full', pin: [0.38, 2.08, 0.05] },
+  { id: 'corner-height', caption: 'Height: 2.28 m', pin: [0.08, 0.55, 0.06] },
+  { id: 'isolators-and-conduit', caption: 'Isolators and conduit', pin: [0.82, 1.45, 0.05] },
+  { id: 'inverter-and-light', caption: 'Aurora inverter. Wall: 2.85 m', pin: [1.85, 2.05, 0.05] },
 ];
 
 const dialog = document.getElementById('photo');
@@ -671,8 +632,9 @@ dialog.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight') showPhoto(photoIndex + 1);
 });
 
+document.getElementById('farView').addEventListener('click', () => openPhoto('porch-from-step'));
+
 const gallery = document.getElementById('gallery');
-const CAMERA_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 4 7.2 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.2L15 4H9Zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>';
 for (const p of PHOTOS) {
   const thumb = document.createElement('button');
   thumb.type = 'button';
@@ -684,7 +646,7 @@ for (const p of PHOTOS) {
   pin.type = 'button';
   pin.className = 'photo-pin';
   pin.setAttribute('aria-label', `Photo: ${p.caption}`);
-  pin.innerHTML = CAMERA_ICON;
+  pin.innerHTML = `<img src="photos/thumbs/${p.id}.jpg" alt="">`;
   pin.addEventListener('click', () => openPhoto(p.id));
   const marker = new CSS2DObject(pin);
   marker.position.set(...p.pin);
@@ -724,10 +686,7 @@ const VIEWS = {
   wall: { pos: [1.42, 1.25, 3.7], target: [1.42, 1.25, 0], fov: 42, fitAspect: 1.6 },
   plan: { pos: [1.3, 16, 1.205], target: [1.3, 0, 1.2], fov: 13, fitAspect: 1 },
 };
-const TITLES = {
-  existing: ['Existing: faulty Aurora inverter', 'Front porch wall, as it is now'],
-  proposed: ['Proposed: new inverter and sub-board', 'Front porch wall, work for quote'],
-};
+const TITLES = { existing: 'Existing: faulty inverter', proposed: 'Proposed: new inverter and sub-board' };
 
 function setView(name) {
   const v = VIEWS[name];
@@ -745,9 +704,7 @@ function setMode(mode) {
   existing.visible = mode === 'existing';
   proposed.visible = mode === 'proposed';
   for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
-  const [title, sub] = TITLES[mode];
-  document.querySelector('#title strong').textContent = title;
-  document.querySelector('#title span').textContent = sub;
+  document.querySelector('#title strong').textContent = TITLES[mode];
 }
 
 for (const b of document.querySelectorAll('[data-mode]')) b.addEventListener('click', () => setMode(b.dataset.mode));
